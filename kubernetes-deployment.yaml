@@ -1,0 +1,276 @@
+# Kubernetes Deployment for Reservoir Production Optimization
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: reservoir-prod
+
+---
+# API Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservoir-api
+  namespace: reservoir-prod
+  labels:
+    app: reservoir-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: reservoir-api
+  template:
+    metadata:
+      labels:
+        app: reservoir-api
+    spec:
+      containers:
+      - name: api
+        image: reservoir-api:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: reservoir-secrets
+              key: database-url
+        - name: REDIS_URL
+          value: "redis://reservoir-redis:6379/0"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+# API Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: reservoir-api-service
+  namespace: reservoir-prod
+spec:
+  selector:
+    app: reservoir-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer
+
+---
+# Dashboard Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservoir-dashboard
+  namespace: reservoir-prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reservoir-dashboard
+  template:
+    metadata:
+      labels:
+        app: reservoir-dashboard
+    spec:
+      containers:
+      - name: dashboard
+        image: reservoir-dashboard:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: API_URL
+          value: "http://reservoir-api-service"
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+
+---
+# Dashboard Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: reservoir-dashboard-service
+  namespace: reservoir-prod
+spec:
+  selector:
+    app: reservoir-dashboard
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8501
+  type: LoadBalancer
+
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reservoir-redis
+  namespace: reservoir-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reservoir-redis
+  template:
+    metadata:
+      labels:
+        app: reservoir-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: reservoir-redis
+  namespace: reservoir-prod
+spec:
+  selector:
+    app: reservoir-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+
+---
+# Horizontal Pod Autoscaler for API
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: reservoir-api-hpa
+  namespace: reservoir-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: reservoir-api
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# ConfigMap for Application Configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reservoir-config
+  namespace: reservoir-prod
+data:
+  log_level: "info"
+  model_version: "1.0.0"
+  max_workers: "4"
+
+---
+# Secret for Sensitive Data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: reservoir-secrets
+  namespace: reservoir-prod
+type: Opaque
+stringData:
+  database-url: "postgresql://user:password@postgres:5432/reservoir_db"
+  api-key: "your-secret-api-key-here"
+  jwt-secret: "your-jwt-secret-here"
+
+---
+# Ingress for External Access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reservoir-ingress
+  namespace: reservoir-prod
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+  - hosts:
+    - api.reservoir.example.com
+    - dashboard.reservoir.example.com
+    secretName: reservoir-tls
+  rules:
+  - host: api.reservoir.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: reservoir-api-service
+            port:
+              number: 80
+  - host: dashboard.reservoir.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: reservoir-dashboard-service
+            port:
+              number: 80
+
+---
+# PersistentVolumeClaim for Model Storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-storage
+  namespace: reservoir-prod
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
