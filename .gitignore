@@ -1,0 +1,66 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual Environment ───────────────────────────────────────────────────────
+venv/
+env/
+.venv/
+ENV/
+
+# ── Data Files (large CSVs — generated locally via data_generator.py) ─────────
+data/synthetic/*.csv
+production_data.csv
+well_properties.csv
+
+# ── Trained Models (large binaries — generated locally via model_training.py) ─
+models/*.pkl
+models/*.joblib
+models/*.h5
+models/*.pt
+
+# ── MLflow ────────────────────────────────────────────────────────────────────
+mlruns/
+mlartifacts/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Environment Variables ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+
+# ── Logs & Temp ───────────────────────────────────────────────────────────────
+*.log
+logs/
+tmp/
+temp/
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+.docker/
+
+# ── Test / Coverage ───────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Nested duplicate directory ────────────────────────────────────────────────
+Reservoir-production-optimization/

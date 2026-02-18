@@ -112,6 +112,12 @@ Economics:  field zone (N/S/E/W), EUR, decline rate, b-factor
 
 ## 🏗️ Architecture
 
+![System Architecture](architecture_diagram.png)
+
+> **Generate locally:** `python generate_architecture.py` → outputs `architecture_diagram.png`
+
+### Architecture Overview
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                    RESERVOIR OPTIMIZATION SYSTEM                 │
@@ -206,41 +212,36 @@ Five dashboard sections:
 
 ### Machine Learning
 ```
-scikit-learn==1.3.0    # Core ML algorithms
-xgboost==2.0.3         # Best performing model (R²=0.94)
-lightgbm==4.1.0        # Fast gradient boosting (R²=0.93)
-catboost==1.2.2        # Categorical boosting
-tensorflow==2.15.0     # Deep learning
-torch==2.1.0           # PyTorch (optional neural nets)
-optuna==3.4.0          # Hyperparameter optimization
-mlflow==2.8.1          # Experiment tracking & model registry
+scikit-learn>=1.3.0    # Core ML algorithms
+xgboost>=2.0.3         # Best performing model (R²=0.94)
+lightgbm>=4.1.0        # Fast gradient boosting (R²=0.93)
+optuna>=3.4.0          # Hyperparameter optimization
+mlflow>=2.8.1          # Experiment tracking & model registry
 ```
 
 ### Data Processing
 ```
-pandas==2.0.3          # Data manipulation
-numpy==1.24.3          # Numerical computing
-scipy==1.11.4          # Scientific computing
-statsmodels==0.14.0    # Statistical models
+pandas>=2.1.0          # Data manipulation
+numpy>=1.26.0          # Numerical computing
+scipy>=1.11.4          # Scientific computing
+statsmodels>=0.14.0    # Statistical models
 ```
 
 ### API & Backend
 ```
-fastapi==0.104.1       # REST API framework
-uvicorn==0.24.0        # ASGI server
-pydantic==2.4.2        # Data validation
-sqlalchemy==2.0.23     # ORM
-psycopg2-binary==2.9.9 # PostgreSQL driver
-redis==5.0.1           # Caching
-celery==5.3.4          # Async task queue
+fastapi>=0.104.1       # REST API framework
+uvicorn>=0.24.0        # ASGI server
+pydantic>=2.4.2        # Data validation
+sqlalchemy>=2.0.23     # ORM
+redis>=5.0.1           # Caching
 ```
 
 ### Visualization & Dashboard
 ```
-streamlit==1.28.1      # Dashboard framework
-plotly==5.17.0         # Interactive charts
-matplotlib==3.7.2      # Static plots
-seaborn==0.12.2        # Statistical visualization
+streamlit>=1.28.1      # Dashboard framework
+plotly>=5.17.0         # Interactive charts
+matplotlib>=3.7.2      # Static plots
+seaborn>=0.12.2        # Statistical visualization
 ```
 
 ### DevOps & Monitoring
@@ -857,7 +858,7 @@ This project is licensed under the **MIT License** — free to use, modify, and 
 **Anmol Shukla** — Petroleum Engineer & Data Analytics Specialist
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-ashukla.in-blue?logo=globe)](https://www.ashukla.in)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin)](https://linkedin.com/in/anmolshukla)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?logo=linkedin)](https://linkedin.com/in/anmolshukla13)
 
 ---
 
